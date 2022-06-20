@@ -23,17 +23,17 @@
     
     .progressBarBackground {
       @include progressBar();
-      background: rgba(0, 0, 0, .1);
+      background: var(--progress-bar-background);
     }
     
     .progressBarLoaded {
       @include progressBar();
-      background: rgba(0, 0, 0, .3);
+      background: var(--progress-bar-loaded);
     }
     
     .progressBarPlayed {
       @include progressBar();
-      background: rgba(255, 145, 0, 1);
+      background: var(--progress-bar-played);
     }
     
     .isNotGrabbing {
@@ -44,13 +44,13 @@
       @include progressBar();
       width: 100%;
       opacity: 0;
-      background: rgba(0, 0, 0, .4);
+      background: var(--progress-bar-preview);
       transition: opacity .2s ease-in-out;
     }
   }
   
   .progressBarDot {
-    background: red;
+    background: var(--progress-bar-dot-background);
     width: 15px;
     min-width: 15px;
     height: 15px;

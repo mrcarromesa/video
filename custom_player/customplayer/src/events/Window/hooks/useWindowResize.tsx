@@ -36,7 +36,6 @@ export const WindowProvider: React.FC<WindowProviderProps> = ({
     });
     
     const handleResize = () => {
-      console.log('ontouchstart' in window);
       setIsMobile('ontouchstart' in window);
       setDimensions({ width: window.innerWidth, height: window.innerHeight });
     }

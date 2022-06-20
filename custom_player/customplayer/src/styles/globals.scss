@@ -1,3 +1,10 @@
+:root {
+  --progress-bar-background: rgba(0, 0, 0, .1);
+  --progress-bar-loaded: rgba(0, 0, 0, .3);
+  --progress-bar-played: rgba(255, 145, 0, 1);
+  --progress-bar-preview: rgba(0, 0, 0, .4);
+  --progress-bar-dot-background: red;
+}
 html,
 body {
   padding: 50px 20px;

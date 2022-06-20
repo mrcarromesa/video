@@ -83,7 +83,6 @@ const ProgressBar: React.FC = () => {
     if (containerRef.current) {
 
       let percentResult = (videoData.currentTime * 100) / videoData.duration;
-      console.log('percentResult', videoData.currentTime, videoData.duration);
 
       if (percentResult < 0) {
         percentResult = 0;

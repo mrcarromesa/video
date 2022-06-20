@@ -1,21 +1,8 @@
-import { useState, useEffect } from 'react';
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Video from 'src/components/Video';
 import WrapVideo from 'src/components/WrapVideo';
 
 const Home: NextPage = () => {
-  const [position, setPosition] = useState(0);
-  useEffect(() => {
-    const time = setInterval(() => {
-      console.log('aqui...');
-      setPosition((oldPosition) => oldPosition + 1);
-    }, 500);
-
-    return () => {
-      clearInterval(time);
-    }
-  }, []);
   return (
     <>
       <Head>

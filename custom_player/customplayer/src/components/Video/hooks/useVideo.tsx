@@ -51,6 +51,7 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({
   useEffect(() => {
     videoDataRef.current = videoData;
   }, [videoData]);
+  
 
   useEffect(() => {
     if (isPlaying && isChanging) {
@@ -61,7 +62,6 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({
     if (isPlaying && !isChanging) {
       video?.play();
     }
-
   }, [isPlaying, isChanging, video]);
 
   useEffect(() => {
@@ -78,17 +78,14 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({
   const bufferedVideo = useCallback((video: HTMLVideoElement) => {
       const buffers = video.buffered;
       let buffered = 0;
-      console.log('buffers.length',buffers.length);
       for(let i = 0; i<buffers.length; i++) {
         buffered += buffers.end(i) - buffers.start(i);
       }
       setBuffered((buffered / video.duration) * 100);
-      console.log('buffered 1', (buffered / video.duration) * 100, '%');
 
   }, []);
 
   const handleOnTimeUpdate = useCallback(() => {
-
     if (video) {
       bufferedVideo(video);
       
@@ -97,8 +94,7 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({
           ...prevState,
           currentTime: video?.currentTime ?? 0,
           duration: video?.duration ?? 0,
-      }}); 
-      console.log('aqui...', video?.currentTime);
+      }});
     }
 
   }, [video, bufferedVideo]);
