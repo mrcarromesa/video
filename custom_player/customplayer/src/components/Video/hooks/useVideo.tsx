@@ -7,41 +7,26 @@ import {
   useState,
   useRef,
 } from "react";
-import { useWindowResize } from "src/events/Window/hooks/useWindowResize";
-import {
-  useMouseEvent,
-  MousePosition,
-} from "src/events/Mouse/hooks/useMouseEvent";
-
-export interface VideoSRC {
-  src: string;
-  initialTime?: number;
-}
 
 interface VideoProviderProps {
   children: ReactNode;
-  video: VideoSRC;
+  video: HTMLVideoElement | null;
+  startIn: number;
 }
 
 export interface VideoDataProps {
-  size: number;
+  duration: number;
   currentTime: number;
-  bufferSize: number;
-  isPlaying: boolean;
-}
-
-interface WindowDimensions {
-  width: number;
-  height: number;
 }
 
 interface VideoContextData {
   videoData: VideoDataProps;
   videoDataRef: VideoDataProps;
+  isPlaying: boolean;
+  buffered: number;
+  setIsChanging: (value: boolean) => void;
   setVideoPosition: (position: number) => void;
-  windowIsMouseDown: boolean;
-  mousePosition: MousePosition;
-  windowDimensions: WindowDimensions;
+  handleOnTimeUpdate: () => void;
 }
 
 
@@ -50,16 +35,16 @@ const VideoContext = createContext<VideoContextData>({} as VideoContextData);
 export const VideoProvider: React.FC<VideoProviderProps> = ({
   children,
   video,
+  startIn,
 }) => {
-  const { dimensions } = useWindowResize();
-  const { isMouseDown, position } = useMouseEvent();
-
-  const [windowDimensions, setWindowDimensions] = useState(dimensions);
-  const [mousePosition, setMousePosition] = useState(position);
 
   const [videoData, setVideoData] = useState<VideoDataProps>(
     {} as VideoDataProps
   );
+
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isChanging, setIsChanging] = useState(false);
+  const [buffered, setBuffered] = useState(0);
 
   const videoDataRef = useRef<VideoDataProps>(videoData);
 
@@ -68,32 +53,78 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({
   }, [videoData]);
 
   useEffect(() => {
-    setWindowDimensions(dimensions);
-  }, [dimensions]);
+    if (isPlaying && isChanging) {
+      // pause
+      video?.pause();
+    }
+
+    if (isPlaying && !isChanging) {
+      video?.play();
+    }
+
+  }, [isPlaying, isChanging, video]);
 
   useEffect(() => {
-    setMousePosition(position);
-  }, [position]);
 
-  useEffect(() => {
     setVideoData((prevState) => {
       return {
         ...prevState,
-        currentTime: video.initialTime ?? 0,
-        size: 10,
+        currentTime: startIn ?? 0,
+        duration: video?.duration ?? 0,
       }
     });
-  }, [video]);
+  }, [startIn, video]);
+
+  const bufferedVideo = useCallback((video: HTMLVideoElement) => {
+      const buffers = video.buffered;
+      let buffered = 0;
+      console.log('buffers.length',buffers.length);
+      for(let i = 0; i<buffers.length; i++) {
+        buffered += buffers.end(i) - buffers.start(i);
+      }
+      setBuffered((buffered / video.duration) * 100);
+      console.log('buffered 1', (buffered / video.duration) * 100, '%');
+
+  }, []);
+
+  const handleOnTimeUpdate = useCallback(() => {
+
+    if (video) {
+      bufferedVideo(video);
+      
+      setVideoData((prevState) => {
+        return {
+          ...prevState,
+          currentTime: video?.currentTime ?? 0,
+          duration: video?.duration ?? 0,
+      }}); 
+      console.log('aqui...', video?.currentTime);
+    }
+
+  }, [video, bufferedVideo]);
 
 
   const setVideoPosition = useCallback((position: number) => {
     setVideoData((prevState) => {
       return {
         ...prevState,
-        currentTime: position <= prevState.size ? position : prevState.currentTime,
+        currentTime: position <= prevState.duration ? position : prevState.currentTime,
       };
     });
-  }, []);
+    if (video) {
+      video.currentTime = position;
+    }
+  }, [video]);
+
+  useEffect(() => {
+    if (video) {
+      video.ontimeupdate = handleOnTimeUpdate;
+
+      video.oncanplay = () => {
+        bufferedVideo(video);
+      }
+    }
+  }, [video, handleOnTimeUpdate, bufferedVideo]);
 
 
   return (
@@ -101,10 +132,11 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({
       value={{
         videoData,
         videoDataRef: videoDataRef.current,
-        windowIsMouseDown: isMouseDown,
-        mousePosition,
-        windowDimensions,
         setVideoPosition,
+        isPlaying,
+        setIsChanging,
+        handleOnTimeUpdate,
+        buffered,
       }}
     >
       {children}

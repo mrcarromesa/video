@@ -1,7 +1,14 @@
-import { useEffect, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
 import debounce from 'lodash/debounce';
 
-interface WindowResizeResultProps {
+export interface WindowContextData {
   dimensions: {
     width: number;
     height: number;
@@ -9,7 +16,15 @@ interface WindowResizeResultProps {
   isMobile: boolean;
 }
 
-export const useWindowResize = (): WindowResizeResultProps => {
+interface WindowProviderProps {
+  children: ReactNode;
+}
+
+const WindowContext = createContext<WindowContextData>({} as WindowContextData);
+
+export const WindowProvider: React.FC<WindowProviderProps> = ({
+  children,
+}) => {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isMobile, setIsMobile] = useState(false);
 
@@ -35,8 +50,23 @@ export const useWindowResize = (): WindowResizeResultProps => {
     };
   }, []);
 
-  return {
-    dimensions,
-    isMobile,
-  };
-}
+
+  return (
+    <WindowContext.Provider
+      value={{
+        dimensions,
+        isMobile,
+      }}
+    >
+      {children}
+    </WindowContext.Provider>
+  );
+};
+
+export const useWindowResize = (): WindowContextData => {
+  const context = useContext(WindowContext);
+  if (!context) {
+    throw new Error("useWindowResize must be used within a WindowProvider");
+  }
+  return context;
+};

@@ -1,14 +1,17 @@
 import { ReactNode } from "react";
-import { TransactionsProvider } from "./useTransactions";
+import MouseAppProvider from "src/events/Mouse/hooks";
+import WindowAppProvider from "src/events/Window/hooks";
 
-interface AppPlayerProviderProps {
+interface AppProvider {
   children: ReactNode;
 }
 
-const AppPlayerProvider: React.FC<AppPlayerProviderProps> = ({ children }) => {
-  return (<TransactionsProvider>
-    {children}
-  </TransactionsProvider>);
-}
+const AppPlayerProvider: React.FC<AppProvider> = ({ children }) => {
+  return (
+    <WindowAppProvider>
+      <MouseAppProvider>{children}</MouseAppProvider>
+    </WindowAppProvider>
+  );
+};
 
 export default AppPlayerProvider;

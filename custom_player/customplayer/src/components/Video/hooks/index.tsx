@@ -1,13 +1,14 @@
 import { ReactNode } from "react";
-import { VideoProvider, VideoSRC } from "./useVideo";
+import { VideoProvider } from "./useVideo";
 
 interface VideoAppProviderProps {
   children: ReactNode;
-  video: VideoSRC;
+  video: HTMLVideoElement | null;
+  startIn: number;
 }
 
-const VideoAppProvider: React.FC<VideoAppProviderProps> = ({ children, video  }) => {
-  return (<VideoProvider video={video} >
+const VideoAppProvider: React.FC<VideoAppProviderProps> = ({ children, video, startIn  }) => {
+  return (<VideoProvider video={video} startIn={startIn} >
     {children}
   </VideoProvider>);
 }

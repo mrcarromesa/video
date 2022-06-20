@@ -36,6 +36,10 @@
       background: rgba(255, 145, 0, 1);
     }
     
+    .isNotGrabbing {
+      transition: width 0s ease-in-out;
+    }
+    
     .progressBarPreview {
       @include progressBar();
       width: 100%;

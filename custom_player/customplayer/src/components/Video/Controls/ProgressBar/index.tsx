@@ -5,30 +5,34 @@ import { useWindowResize } from "src/events/Window/hooks/useWindowResize";
 import GrabButton from "./GrabButton";
 import Played from "./Played";
 
+import { useMouseEvent } from "src/events/Mouse/hooks/useMouseEvent";
+
 import styles from "./styles.module.scss";
 
 const ProgressBar: React.FC = () => {
   const {
     videoData,
-    windowIsMouseDown,
-    mousePosition,
-    windowDimensions,
     setVideoPosition,
+    setIsChanging,
+    buffered,
   } = useVideo();
-
+  const { isMouseDown, position } = useMouseEvent();
   const { isMobile } = useWindowResize();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarDotRef = useRef<HTMLDivElement>(null);
 
+  const videoDataRef = useRef<VideoDataProps>(videoData);
+
   const [positionProgressPlayed, setPositionProgressPlayed] = useState(0);
   const [maxPositionProgressBarDog, setMaxPositionProgressBarDog] = useState(0);
-
   const [hoverPlayerPreview, setHoverPlayerPreview] = useState(0);
-
   const [isPressed, setIsPressed] = useState(false);
-
   const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    videoDataRef.current = videoData;
+  }, [videoData]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -45,19 +49,17 @@ const ProgressBar: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!windowIsMouseDown) {
+    if (!isMouseDown) {
       setIsPressed(false);
+      setIsChanging(false);
     }
-  }, [windowIsMouseDown]);
+  }, [isMouseDown, setIsChanging]);
 
-  useEffect(() => {
-    if (isPressed && containerRef.current && progressBarDotRef.current) {
-      const position = mousePosition;
-
+  const handleGoToPositionInProgressBar = useCallback((elementWidth = 0) => {
+    if (containerRef.current) {
       const { offsetLeft, offsetWidth } = containerRef.current;
-      const { clientWidth: elementOffsetWidth } = progressBarDotRef.current;
 
-      const buttonPositionX = position.x - offsetLeft - elementOffsetWidth / 2;
+      const buttonPositionX = position.x - offsetLeft - elementWidth;
 
       let percentResult = (buttonPositionX / offsetWidth) * 100;
 
@@ -70,44 +72,47 @@ const ProgressBar: React.FC = () => {
       }
 
       setPositionProgressPlayed(percentResult);
-    }
-  }, [isPressed, mousePosition, maxPositionProgressBarDog]);
 
+      const videoNewPos = videoDataRef.current.duration * percentResult / 100;
+
+      setVideoPosition(videoNewPos);
+    }
+  }, [maxPositionProgressBarDog, position, setVideoPosition]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+
+      let percentResult = (videoData.currentTime * 100) / videoData.duration;
+      console.log('percentResult', videoData.currentTime, videoData.duration);
+
+      if (percentResult < 0) {
+        percentResult = 0;
+      }
+
+      if (percentResult >= maxPositionProgressBarDog) {
+        percentResult = 100;
+      }
+
+      setPositionProgressPlayed(percentResult);
+    }
+  }, [maxPositionProgressBarDog, videoData]);
+
+  useEffect(() => {
+    if (isPressed && progressBarDotRef.current) {
+      setIsChanging(true);
+      const { clientWidth: elementOffsetWidth } = progressBarDotRef.current;
+      handleGoToPositionInProgressBar(elementOffsetWidth / 2);
+    }
+  }, [isPressed, handleGoToPositionInProgressBar, setIsChanging]);
 
   const onHoverProgressBarPreview = useCallback(() => {
     if (containerRef.current) {
-      const position = mousePosition;
       const { offsetLeft, offsetWidth } = containerRef.current;
-
       const positionX = position.x - offsetLeft;
-
-      let percentResult = (positionX / offsetWidth);
-
+      const percentResult = (positionX / offsetWidth);
       setHoverPlayerPreview(percentResult);
-
     }
-  }, [mousePosition]);
-
-  const handleGoToPositionInProgressBar = useCallback(() => {
-    if (containerRef.current && progressBarDotRef.current) {
-      const position = mousePosition;
-      const { offsetLeft, offsetWidth } = containerRef.current;
-
-      const buttonPositionX = position.x - offsetLeft;
-
-      let percentResult = (buttonPositionX / offsetWidth) * 100;
-
-      if (percentResult < 0) {
-        percentResult = 0;
-      }
-
-      if (percentResult >= maxPositionProgressBarDog) {
-        percentResult = 100;
-      }
-
-      setPositionProgressPlayed(percentResult);
-    }
-  }, [maxPositionProgressBarDog, mousePosition]);
+  }, [position]);
 
   return (
     <div
@@ -123,9 +128,8 @@ const ProgressBar: React.FC = () => {
     >
       <div 
         className={styles.progressBar}
-        onClick={handleGoToPositionInProgressBar}
+        onClick={() => handleGoToPositionInProgressBar()}
         onMouseDown={(e) => {
-          console.log('aqui...');
           setIsPressed(true);
         }}
       >
@@ -133,7 +137,7 @@ const ProgressBar: React.FC = () => {
         <div
           className={styles.progressBarLoaded}
           style={{
-            width: "50%",
+            width: `${buffered}%`,
           }}
         ></div>
         <div
@@ -144,7 +148,10 @@ const ProgressBar: React.FC = () => {
           }}
         ></div>
         <Played 
-          className={styles.progressBarPlayed}
+          className={`
+            ${styles.progressBarPlayed}
+            ${!isPressed ? styles.isNotGrabbing : ""}
+          `}
           seekPositionX={positionProgressPlayed}
         />
       </div>

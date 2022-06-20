@@ -1,11 +1,32 @@
-import { useEffect, useState, useCallback } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+
+interface MouseProviderProps {
+  children: ReactNode;
+}
 
 export interface MousePosition {
   x: number;
   y: number;
 }
 
-export const useMouseEvent = () => {
+export interface MouseEventContextData {
+  position: MousePosition;
+  isMouseDown: boolean;
+}
+
+
+const MouseContext = createContext<MouseEventContextData>({} as MouseEventContextData);
+
+export const MouseProvider: React.FC<MouseProviderProps> = ({
+  children,
+}) => {
   const [position, setPosition] = useState<MousePosition>({} as MousePosition);
   const [isMouseDown, setIsMouseDown] = useState(false);
 
@@ -44,9 +65,23 @@ export const useMouseEvent = () => {
 
   }, []);
 
-  return {
-    position,
-    isMouseDown
-  };
 
-}
+  return (
+    <MouseContext.Provider
+      value={{
+        position,
+        isMouseDown,
+      }}
+    >
+      {children}
+    </MouseContext.Provider>
+  );
+};
+
+export const useMouseEvent = (): MouseEventContextData => {
+  const context = useContext(MouseContext);
+  if (!context) {
+    throw new Error("useMouseEvent must be used within a MouseProvider");
+  }
+  return context;
+};
