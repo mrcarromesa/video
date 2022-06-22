@@ -1,14 +1,7 @@
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import debounce from "lodash/debounce";
+import { useEffect, useMemo, useState } from "react";
 
-import debounce from 'lodash/debounce';
-
-export interface WindowContextData {
+export interface WindowResult {
   dimensions: {
     width: number;
     height: number;
@@ -16,29 +9,26 @@ export interface WindowContextData {
   isMobile: boolean;
 }
 
-interface WindowProviderProps {
-  children: ReactNode;
-}
-
-const WindowContext = createContext<WindowContextData>({} as WindowContextData);
-
-export const WindowProvider: React.FC<WindowProviderProps> = ({
-  children,
-}) => {
+export const useWindowResize = (): WindowResult => {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isMobile, setIsMobile] = useState(false);
 
+  const results = useMemo(
+    () => ({ dimensions, isMobile }),
+    [dimensions, isMobile]
+  );
+
   useEffect(() => {
-    setIsMobile('ontouchstart' in window);
+    setIsMobile("ontouchstart" in window);
     setDimensions({
       width: window.innerWidth,
       height: window.innerHeight,
     });
-    
+
     const handleResize = () => {
-      setIsMobile('ontouchstart' in window);
+      setIsMobile("ontouchstart" in window);
       setDimensions({ width: window.innerWidth, height: window.innerHeight });
-    }
+    };
 
     const debouncedHandleResize = debounce(handleResize, 50);
 
@@ -49,23 +39,5 @@ export const WindowProvider: React.FC<WindowProviderProps> = ({
     };
   }, []);
 
-
-  return (
-    <WindowContext.Provider
-      value={{
-        dimensions,
-        isMobile,
-      }}
-    >
-      {children}
-    </WindowContext.Provider>
-  );
-};
-
-export const useWindowResize = (): WindowContextData => {
-  const context = useContext(WindowContext);
-  if (!context) {
-    throw new Error("useWindowResize must be used within a WindowProvider");
-  }
-  return context;
+  return results;
 };

@@ -1,34 +1,46 @@
-import { useRef, useEffect, useState, useCallback } from "react";
-
-import { useVideo, VideoDataProps } from "src/components/Video/hooks/useVideo";
-import { useWindowResize } from "src/events/Window/hooks/useWindowResize";
-import GrabButton from "./GrabButton";
-import Played from "./Played";
-
+import debounce from "lodash/debounce";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMouseEvent } from "src/events/Mouse/hooks/useMouseEvent";
+import { useWindowResize } from "src/events/Window/hooks/useWindowResize";
 
+import { ContainerProgressBar } from "./components/ContainerProgressBar";
+import GrabButton from "./components/GrabButton";
 import styles from "./styles.module.scss";
 
-const ProgressBar: React.FC = () => {
-  const {
-    videoData,
-    setVideoPosition,
-    setIsChanging,
-    buffered,
-  } = useVideo();
+interface VideoDataProps {
+  duration: number;
+  currentTime: number;
+  bufferPercent: number;
+}
+
+interface ProgressBarProps {
+  videoData: VideoDataProps;
+  onSeek: (time: number) => void;
+  onSeekStart: () => void;
+  onSeekEnd: () => void;
+}
+
+const ProgressBar: React.FC<ProgressBarProps> = ({
+  videoData,
+  onSeek,
+  onSeekStart,
+  onSeekEnd,
+}) => {
   const { isMouseDown, position } = useMouseEvent();
-  const { isMobile } = useWindowResize();
+  const { isMobile, dimensions } = useWindowResize();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarDotRef = useRef<HTMLDivElement>(null);
-
+  const maxPositionProgressGrabButton = useRef(0);
+  const gapGrabButton = useRef(0);
+  const isSeeking = useRef(false);
   const videoDataRef = useRef<VideoDataProps>(videoData);
 
-  const [positionProgressPlayed, setPositionProgressPlayed] = useState(0);
-  const [maxPositionProgressBarDog, setMaxPositionProgressBarDog] = useState(0);
-  const [hoverPlayerPreview, setHoverPlayerPreview] = useState(0);
+  const [positionProgressGrabButton, setPositionProgressGrabButton] =
+    useState(0);
   const [isPressed, setIsPressed] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [positionProgressPlayed, setPositionProgressPlayed] = useState(0);
 
   useEffect(() => {
     videoDataRef.current = videoData;
@@ -42,76 +54,96 @@ const ProgressBar: React.FC = () => {
 
   useEffect(() => {
     const buttonPxWidth = progressBarDotRef.current?.clientWidth || 1;
-    const screenWidth = containerRef.current?.clientWidth || 1;
+    const containerWidth =
+      containerRef.current?.getBoundingClientRect().width || 1;
     const buttonPercentWidth = buttonPxWidth * 100;
-    const maxPercentage = 100 - buttonPercentWidth / screenWidth;
-    setMaxPositionProgressBarDog(maxPercentage);
+    const maxPercentage = 100 - buttonPercentWidth / containerWidth;
+    maxPositionProgressGrabButton.current = Math.abs(maxPercentage);
+    gapGrabButton.current = 100 - maxPositionProgressGrabButton.current;
+  }, [dimensions]);
+
+  useEffect(() => {
+    if (!isMouseDown && isSeeking.current) {
+      setIsPressed(false);
+      onSeekEnd();
+      debounce(() => {
+        isSeeking.current = false;
+      }, 5)();
+    }
+  }, [isMouseDown, onSeekEnd]);
+
+  const fixGapFromGrabButton = useCallback((percentResult: number): number => {
+    const fixGap =
+      (percentResult * gapGrabButton.current) /
+      maxPositionProgressGrabButton.current;
+    return percentResult + fixGap;
+  }, []);
+
+  const fixGapToGrabButton = useCallback((percentResult: number): number => {
+    const fixGap = (percentResult * gapGrabButton.current) / 100;
+    return percentResult - fixGap;
   }, []);
 
   useEffect(() => {
-    if (!isMouseDown) {
-      setIsPressed(false);
-      setIsChanging(false);
-    }
-  }, [isMouseDown, setIsChanging]);
+    setPositionProgressPlayed(
+      fixGapFromGrabButton(positionProgressGrabButton) || 0
+    );
+  }, [positionProgressGrabButton, fixGapFromGrabButton, dimensions]);
 
-  const handleGoToPositionInProgressBar = useCallback((elementWidth = 0) => {
-    if (containerRef.current) {
-      const { offsetLeft, offsetWidth } = containerRef.current;
+  const handleGoToPositionInProgressBar = useCallback(
+    (elementWidth = 0) => {
+      if (containerRef.current) {
+        const { x, width } = containerRef.current.getBoundingClientRect();
 
-      const buttonPositionX = position.x - offsetLeft - elementWidth;
+        const positionX = position.x - x - elementWidth;
 
-      let percentResult = (buttonPositionX / offsetWidth) * 100;
+        let percentResult = (positionX / width) * 100;
 
-      if (percentResult < 0) {
-        percentResult = 0;
+        if (percentResult < 0) {
+          percentResult = 0;
+        }
+
+        if (percentResult >= maxPositionProgressGrabButton.current) {
+          percentResult = maxPositionProgressGrabButton.current;
+        }
+
+        const fixedPosition = fixGapFromGrabButton(percentResult);
+        setPositionProgressGrabButton(percentResult);
+
+        const videoNewPos =
+          (videoDataRef.current.duration * fixedPosition) / 100;
+
+        onSeek(videoNewPos);
       }
-
-      if (percentResult >= maxPositionProgressBarDog) {
-        percentResult = 100;
-      }
-
-      setPositionProgressPlayed(percentResult);
-
-      const videoNewPos = videoDataRef.current.duration * percentResult / 100;
-
-      setVideoPosition(videoNewPos);
-    }
-  }, [maxPositionProgressBarDog, position, setVideoPosition]);
+    },
+    [position, onSeek, fixGapFromGrabButton]
+  );
 
   useEffect(() => {
-    if (containerRef.current) {
-
+    if (!isSeeking.current && containerRef.current) {
       let percentResult = (videoData.currentTime * 100) / videoData.duration;
 
       if (percentResult < 0) {
         percentResult = 0;
       }
 
-      if (percentResult >= maxPositionProgressBarDog) {
+      if (percentResult >= 100) {
         percentResult = 100;
       }
 
-      setPositionProgressPlayed(percentResult);
+      const realPosition = fixGapToGrabButton(percentResult);
+      setPositionProgressGrabButton(realPosition);
     }
-  }, [maxPositionProgressBarDog, videoData]);
+  }, [videoData, fixGapToGrabButton]);
 
   useEffect(() => {
     if (isPressed && progressBarDotRef.current) {
-      setIsChanging(true);
+      onSeekStart();
+      isSeeking.current = true;
       const { clientWidth: elementOffsetWidth } = progressBarDotRef.current;
       handleGoToPositionInProgressBar(elementOffsetWidth / 2);
     }
-  }, [isPressed, handleGoToPositionInProgressBar, setIsChanging]);
-
-  const onHoverProgressBarPreview = useCallback(() => {
-    if (containerRef.current) {
-      const { offsetLeft, offsetWidth } = containerRef.current;
-      const positionX = position.x - offsetLeft;
-      const percentResult = (positionX / offsetWidth);
-      setHoverPlayerPreview(percentResult);
-    }
-  }, [position]);
+  }, [isPressed, handleGoToPositionInProgressBar, onSeekStart]);
 
   return (
     <div
@@ -120,52 +152,26 @@ const ProgressBar: React.FC = () => {
       style={{
         visibility: isReady ? "visible" : "hidden",
       }}
-      onContextMenu={(e)=> e.preventDefault()}
-      onMouseMove={() => {
-        onHoverProgressBarPreview()
-      }}
+      onContextMenu={(e) => e.preventDefault()}
     >
-      <div 
-        className={styles.progressBar}
-        onClick={() => handleGoToPositionInProgressBar()}
-        onMouseDown={(e) => {
-          setIsPressed(true);
-        }}
-      >
-        <div className={styles.progressBarBackground}></div>
-        <div
-          className={styles.progressBarLoaded}
-          style={{
-            width: `${buffered}%`,
-          }}
-        ></div>
-        <div
-          className={styles.progressBarPreview}
-          style={{ 
-            visibility: !isMobile ? "visible" : "hidden",
-            transform: `scaleX(${hoverPlayerPreview})` 
-          }}
-        ></div>
-        <Played 
-          className={`
-            ${styles.progressBarPlayed}
-            ${!isPressed ? styles.isNotGrabbing : ""}
-          `}
-          seekPositionX={positionProgressPlayed}
-        />
-      </div>
-      <GrabButton 
+      <ContainerProgressBar
+        videoData={videoData}
+        isPressed={isPressed}
+        positionProgressPlayed={positionProgressPlayed}
+        onClick={handleGoToPositionInProgressBar}
+        onMouseDown={() => setIsPressed(true)}
+      />
+      <GrabButton
         ref={progressBarDotRef}
         className={`
           ${styles.progressBarDot} 
           ${isPressed ? styles.grabbing : ""}
           ${isMobile ? styles.isMobile : ""}
         `}
-        onMouseDown={(e) => {
+        onMouseDown={() => {
           setIsPressed(true);
         }}
-        containerRef={containerRef}
-        positionX={positionProgressPlayed}
+        positionX={positionProgressGrabButton}
       />
     </div>
   );

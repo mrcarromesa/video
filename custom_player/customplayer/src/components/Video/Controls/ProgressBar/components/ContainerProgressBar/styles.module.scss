@@ -1,0 +1,49 @@
+@mixin progressBar() {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+}
+
+.progressBar {
+  @include progressBar();
+  overflow: hidden;
+  height: 5px;
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    @include progressBar();
+    background: var(--progress-bar-background);
+  }
+  
+  .progressBarLoaded {
+    @include progressBar();
+    background: var(--progress-bar-loaded);
+  }
+  
+  .progressBarPlayed {
+    @include progressBar();
+    background: var(--progress-bar-played);
+  }
+  
+  .isNotGrabbing {
+    transition: width 0s ease-in-out;
+  }
+  
+  .progressBarPreview {
+    @include progressBar();
+    width: 100%;
+    opacity: 0;
+    background: var(--progress-bar-preview);
+    transition: opacity .2s ease-in-out;
+  }
+
+  &:hover {
+    .progressBarPreview {
+      opacity: 1;
+    }
+  }
+}

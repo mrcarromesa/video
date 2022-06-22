@@ -1,19 +1,16 @@
-interface PlayedProps {
+interface PlayedProgressProps {
   className: string;
   seekPositionX: number;
 }
 
-const Played: React.FC<PlayedProps> = ({
+export const PlayedProgress: React.FC<PlayedProgressProps> = ({
   className,
   seekPositionX,
-}) => {
-  return (
-    <div
+}) => (
+  <div
     className={`${className}`}
     style={{
       width: `${seekPositionX}%`,
     }}
-  ></div>);
-}
-
-export default Played;
+  />
+);

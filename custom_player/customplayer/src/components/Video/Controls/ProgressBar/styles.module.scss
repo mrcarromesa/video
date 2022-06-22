@@ -1,12 +1,3 @@
-@mixin progressBar() {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transform-origin: 0 0;
-}
-
 .container {
   position: relative;
   width: 100%;
@@ -14,40 +5,6 @@
   padding: 5px 0;
   display: flex;
   align-items: center;
-  
-  .progressBar {
-    @include progressBar();
-    overflow: hidden;
-    height: 5px;
-    cursor: pointer;
-    
-    .progressBarBackground {
-      @include progressBar();
-      background: var(--progress-bar-background);
-    }
-    
-    .progressBarLoaded {
-      @include progressBar();
-      background: var(--progress-bar-loaded);
-    }
-    
-    .progressBarPlayed {
-      @include progressBar();
-      background: var(--progress-bar-played);
-    }
-    
-    .isNotGrabbing {
-      transition: width 0s ease-in-out;
-    }
-    
-    .progressBarPreview {
-      @include progressBar();
-      width: 100%;
-      opacity: 0;
-      background: var(--progress-bar-preview);
-      transition: opacity .2s ease-in-out;
-    }
-  }
   
   .progressBarDot {
     background: var(--progress-bar-dot-background);
@@ -68,10 +25,6 @@
     .progressBarDot {
       opacity: 1;
       transform: scale(1);
-    }
-
-    .progressBarPreview {
-      opacity: 1;
     }
   }
   
