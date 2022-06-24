@@ -1,21 +1,17 @@
 /* eslint-disable no-param-reassign */
 import { useCallback, useEffect, useState } from "react";
 
+import * as VideoDataProps from "../dtos/VideoDataPropsDTO";
+
 interface VideoProps {
   videoElement: HTMLVideoElement | null;
   startIn?: number;
 }
-
-export interface VideoDataProps {
-  duration: number;
-  currentTime: number;
-  bufferPercent: number;
-}
-
 interface VideoResult {
   videoElement: HTMLVideoElement | null;
-  videoData: VideoDataProps;
+  videoData: VideoDataProps.VideoDataProps;
   isPlaying: boolean;
+  bufferedChunks: VideoDataProps.BufferedChunk[];
   goToTime: (time: number) => void;
 }
 
@@ -23,30 +19,55 @@ export const useVideo = ({
   videoElement,
   startIn,
 }: VideoProps): VideoResult => {
-  const [videoData, setVideoData] = useState<VideoDataProps>(
-    {} as VideoDataProps
+  const [videoData, setVideoData] = useState<VideoDataProps.VideoDataProps>(
+    {} as VideoDataProps.VideoDataProps
   );
+
+  const [bufferedChunks, setBufferedChunks] = useState<
+    VideoDataProps.BufferedChunk[]
+  >([]);
+
   const [isPlaying, setIsPlaying] = useState(false);
 
   const getBufferedVideo = useCallback((video: HTMLVideoElement) => {
     const buffers = video.buffered;
-    let buffered = 0;
-    for (let i = 0; i < buffers.length; i += 1) {
-      buffered += buffers.end(i) - buffers.start(i);
+    // let buffered = 0;
+    // for (let i = 0; i < buffers.length; i += 1) {
+    //   buffered += buffers.end(i) - buffers.start(i);
+    // }
+    const buffered = {
+      start: 0,
+      end: 0,
+      range: 0,
+    };
+
+    console.log("buffers.length", buffers.length);
+    if (buffers.length > 0) {
+      const lastBuffers = buffers.length - 1;
+      buffered.start = (buffers.start(lastBuffers) / video.duration) * 100;
+      buffered.end = (buffers.end(lastBuffers) / video.duration) * 100;
+      buffered.range =
+        ((buffers.end(lastBuffers) - buffers.start(lastBuffers)) /
+          video.duration) *
+        100;
+      // console.log(
+      //   buffers.end(lastBuffers),
+      //   " - ",
+      //   buffers.start(lastBuffers),
+      //   " / ",
+      //   video.duration
+      // );
     }
-    return (buffered / video.duration) * 100;
+    return buffered;
   }, []);
 
   useEffect(() => {
-    let bufferPercent = 0;
     if (videoElement) {
-      bufferPercent = getBufferedVideo(videoElement);
       videoElement.currentTime = startIn || 0;
     }
     setVideoData({
       currentTime: startIn ?? 0,
       duration: videoElement?.duration ?? 0,
-      bufferPercent,
     });
   }, [startIn, videoElement, getBufferedVideo]);
 
@@ -55,10 +76,9 @@ export const useVideo = ({
       setVideoData({
         currentTime: videoElement.currentTime ?? 0,
         duration: videoElement.duration ?? 0,
-        bufferPercent: getBufferedVideo(videoElement),
       });
     }
-  }, [videoElement, getBufferedVideo]);
+  }, [videoElement]);
 
   useEffect(() => {
     if (videoElement) {
@@ -72,11 +92,28 @@ export const useVideo = ({
         setIsPlaying(false);
       };
 
+      videoElement.onprogress = () => {
+        const buffers = videoElement.buffered;
+        const bufferedChunks = [];
+        for (let i = 0; i < buffers.length; i += 1) {
+          const buffered = {
+            start: 0,
+            end: 0,
+            range: 0,
+          };
+          buffered.start = (buffers.start(i) / videoElement.duration) * 100;
+          buffered.end = (buffers.end(i) / videoElement.duration) * 100;
+          buffered.range =
+            ((buffers.end(i) - buffers.start(i)) / videoElement.duration) * 100;
+          bufferedChunks.push(buffered);
+        }
+        setBufferedChunks(bufferedChunks);
+      };
+
       videoElement.oncanplay = () => {
         setVideoData({
           currentTime: videoElement.currentTime ?? 0,
           duration: videoElement.duration ?? 0,
-          bufferPercent: getBufferedVideo(videoElement),
         });
       };
     }
@@ -96,6 +133,7 @@ export const useVideo = ({
     videoElement,
     isPlaying,
     videoData,
+    bufferedChunks,
     goToTime,
   };
 };

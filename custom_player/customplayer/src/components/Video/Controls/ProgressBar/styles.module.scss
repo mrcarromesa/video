@@ -27,17 +27,6 @@
       transform: scale(1);
     }
   }
-  
-  .grabbing {
-    cursor: grabbing;
-    opacity: 1;
-    transform: scale(1);
-  }
-  
-  .isMobile{
-    opacity: 1;
-    transform: scale(1);
-  }
 
   .progressBarDot.isMobile::after {
     content: ' ';

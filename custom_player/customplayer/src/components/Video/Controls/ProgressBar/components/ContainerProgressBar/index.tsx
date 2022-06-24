@@ -1,31 +1,20 @@
 import { useCallback, useRef, useState } from "react";
 import { useMouseEvent } from "src/events/Mouse/hooks/useMouseEvent";
 
+import { useProgressBar } from "../../hooks/useProgressBar";
 import { LineHoverProgress } from "../LineHoverProgress";
 import { PlayedProgress } from "../PlayedProgress";
 import { ProgressBarLoaded } from "../ProgressBarLoaded";
 import styles from "./styles.module.scss";
 
-interface ContainerProgressBarProps {
-  // to hook
-  videoData: {
-    bufferPercent: number;
-  };
-  isPressed: boolean;
-  positionProgressPlayed: number;
-  // /to hook
+export const ContainerProgressBar: React.FC = () => {
+  const {
+    isHoldingSliderButton,
+    handleHoldSliderButton,
+    positionProgressPlayed,
+    handleGoToPositionInProgressBar,
+  } = useProgressBar();
 
-  onMouseDown: () => void;
-  onClick: () => void;
-}
-
-export const ContainerProgressBar: React.FC<ContainerProgressBarProps> = ({
-  videoData,
-  isPressed,
-  positionProgressPlayed,
-  onMouseDown,
-  onClick,
-}) => {
   const { position } = useMouseEvent();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -45,16 +34,13 @@ export const ContainerProgressBar: React.FC<ContainerProgressBarProps> = ({
     <div
       ref={containerRef}
       className={styles.progressBar}
-      onClick={onClick}
+      onClick={handleGoToPositionInProgressBar}
       onMouseMove={() => {
         onHoverProgressBarPreview();
       }}
-      onMouseDown={onMouseDown}
+      onMouseDown={handleHoldSliderButton}
     >
-      <ProgressBarLoaded
-        className={styles.progressBarLoaded}
-        loadedPercent={videoData.bufferPercent}
-      />
+      <ProgressBarLoaded className={styles.progressBarLoaded} />
       <LineHoverProgress
         className={styles.progressBarPreview}
         positionX={hoverPlayerPreview}
@@ -62,7 +48,7 @@ export const ContainerProgressBar: React.FC<ContainerProgressBarProps> = ({
       <PlayedProgress
         className={`
             ${styles.progressBarPlayed}
-            ${!isPressed ? styles.isNotGrabbing : ""}
+            ${!isHoldingSliderButton ? styles.isNotGrabbing : ""}
           `}
         seekPositionX={positionProgressPlayed}
       />

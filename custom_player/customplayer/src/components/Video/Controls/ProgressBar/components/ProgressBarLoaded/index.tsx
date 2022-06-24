@@ -1,16 +1,26 @@
+import { useProgressBar } from "../../hooks/useProgressBar";
+
 interface ProgressBarLoadedProps {
   className: string;
-  loadedPercent: number;
 }
 
 export const ProgressBarLoaded: React.FC<ProgressBarLoadedProps> = ({
   className,
-  loadedPercent,
-}) => (
-  <div
-    className={className}
-    style={{
-      width: `${loadedPercent}%`,
-    }}
-  />
-);
+}) => {
+  const { bufferedChunks } = useProgressBar();
+
+  return (
+    <>
+      {bufferedChunks.map((item, i) => (
+        <div
+          key={String(i)}
+          className={className}
+          style={{
+            width: `${item.range || 0}%`,
+            left: `${item.start || 0}%`,
+          }}
+        />
+      ))}
+    </>
+  );
+};

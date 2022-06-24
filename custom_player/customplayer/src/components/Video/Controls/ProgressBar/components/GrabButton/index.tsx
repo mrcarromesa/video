@@ -1,22 +1,36 @@
 import { forwardRef } from "react";
+import { useWindowResize } from "src/events/Window/hooks/useWindowResize";
+
+import { useProgressBar } from "../../hooks/useProgressBar";
+import styles from "./styles.module.scss";
 
 interface GrabButtonProps {
-  onMouseDown: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-  positionX: number;
   className: string;
 }
 
 const GrabButton = forwardRef<HTMLDivElement, GrabButtonProps>(
-  ({ positionX, onMouseDown, className }, ref) => (
-    <div
-      ref={ref}
-      className={`${className}`}
-      style={{
-        marginLeft: `${positionX}%`,
-      }}
-      onMouseDown={onMouseDown}
-    />
-  )
+  ({ className }, ref) => {
+    const {
+      isHoldingSliderButton,
+      handleHoldSliderButton,
+      positionProgressGrabButton,
+    } = useProgressBar();
+    const { isMobile } = useWindowResize();
+    return (
+      <div
+        ref={ref}
+        className={`
+        ${className}
+        ${isHoldingSliderButton ? styles.grabbing : ""}
+        ${isMobile ? styles.isMobile : ""}
+        `}
+        style={{
+          marginLeft: `${positionProgressGrabButton || 0}%`,
+        }}
+        onMouseDown={handleHoldSliderButton}
+      />
+    );
+  }
 );
 
 GrabButton.displayName = "GrabButton";

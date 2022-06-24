@@ -12,7 +12,7 @@ const Video: React.FC<VideoProps> = () => {
   const [isReady, setIsReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const { videoData, goToTime } = useVideo({
+  const { videoData, goToTime, bufferedChunks } = useVideo({
     videoElement: videoRef.current,
     startIn: 5,
   });
@@ -42,6 +42,7 @@ const Video: React.FC<VideoProps> = () => {
       </video>
       <Progress
         videoData={videoData}
+        bufferedChunks={bufferedChunks}
         onSeek={(time) => {
           goToTime(time);
         }}
