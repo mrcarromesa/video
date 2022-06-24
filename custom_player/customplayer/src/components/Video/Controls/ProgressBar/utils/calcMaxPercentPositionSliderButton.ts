@@ -1,12 +1,12 @@
-interface CalcMaxPercentPositionGrabButtonProps {
+interface CalcMaxPercentPositionSliderButtonProps {
   buttonWidth: number;
   containerWidth: number;
 }
 
-export const calcMaxPercentPositionGrabButton = ({
+export const calcMaxPercentPositionSliderButton = ({
   buttonWidth,
   containerWidth,
-}: CalcMaxPercentPositionGrabButtonProps): number => {
+}: CalcMaxPercentPositionSliderButtonProps): number => {
   const buttonPercentWidth = buttonWidth * 100;
   const maxPercentage = 100 - buttonPercentWidth / containerWidth;
   return Math.abs(maxPercentage);

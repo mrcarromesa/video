@@ -14,11 +14,11 @@ import * as VideoDataProps from "src/components/Video/dtos/VideoDataPropsDTO";
 import { useMouseEvent } from "src/events/Mouse/hooks/useMouseEvent";
 import { useWindowResize } from "src/events/Window/hooks/useWindowResize";
 
-import { calcMaxPercentPositionGrabButton } from "../utils/calcMaxPercentPositionGrabButton";
+import { calcMaxPercentPositionSliderButton } from "../utils/calcMaxPercentPositionSliderButton";
 import {
-  fixGapFromGrabButton,
-  fixGapToGrabButton,
-} from "../utils/fixGrabButtonPosition";
+  fixGapFromSliderButton,
+  fixGapToSliderButton,
+} from "../utils/fixSliderButtonPosition";
 
 export interface ProgressBarProviderProps {
   children: ReactNode;
@@ -34,7 +34,7 @@ export interface ProgressBarProviderProps {
 interface ProgressBarContextData {
   isHoldingSliderButton: boolean;
   positionProgressPlayed: number;
-  positionProgressGrabButton: number;
+  positionProgressSliderButton: number;
   videoData: VideoDataProps.VideoDataProps;
   bufferedChunks: VideoDataProps.BufferedChunk[];
   handleHoldSliderButton: () => void;
@@ -60,12 +60,12 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
   const { isMouseDown, position } = useMouseEvent();
   const { dimensions } = useWindowResize();
 
-  const maxPositionProgressGrabButton = useRef(0);
-  const gapGrabButton = useRef(0);
+  const maxPositionProgressSliderButton = useRef(0);
+  const gapSliderButton = useRef(0);
   const isSeeking = useRef(false);
   const videoDataRef = useRef<VideoDataProps.VideoDataProps>(videoData);
 
-  const [positionProgressGrabButton, setPositionProgressGrabButton] =
+  const [positionProgressSliderButton, setPositionProgressSliderButton] =
     useState(0);
   const [isHoldingSliderButton, setIsHoldingSliderButton] = useState(false);
   const [positionProgressPlayed, setPositionProgressPlayed] = useState(0);
@@ -78,11 +78,12 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
     const buttonPxWidth = progressBarDotRef.current?.clientWidth || 1;
     const containerWidth =
       containerRef.current?.getBoundingClientRect().width || 1;
-    maxPositionProgressGrabButton.current = calcMaxPercentPositionGrabButton({
-      buttonWidth: buttonPxWidth,
-      containerWidth,
-    });
-    gapGrabButton.current = 100 - maxPositionProgressGrabButton.current;
+    maxPositionProgressSliderButton.current =
+      calcMaxPercentPositionSliderButton({
+        buttonWidth: buttonPxWidth,
+        containerWidth,
+      });
+    gapSliderButton.current = 100 - maxPositionProgressSliderButton.current;
   }, [containerRef, dimensions, progressBarDotRef]);
 
   useEffect(() => {
@@ -97,20 +98,20 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
 
   useEffect(() => {
     setPositionProgressPlayed(
-      fixGapFromGrabButton({
-        gapGrabButton: gapGrabButton.current,
-        maxPositionProgressGrabButton: maxPositionProgressGrabButton.current,
-        percentResult: positionProgressGrabButton,
+      fixGapFromSliderButton({
+        gapSliderButton: gapSliderButton.current,
+        maxPositionProgressSliderButton:
+          maxPositionProgressSliderButton.current,
+        percentResult: positionProgressSliderButton,
       }) || 0
     );
-  }, [positionProgressGrabButton, dimensions]);
+  }, [positionProgressSliderButton, dimensions]);
 
   const handleGoToPositionInProgressBar = useCallback(
     (elementWidth = 0) => {
       if (containerRef.current && videoDataRef.current.duration > 0) {
         const { x, width } = containerRef.current.getBoundingClientRect();
 
-        // add to lib
         const positionX = position.x - x - elementWidth;
 
         let percentResult = (positionX / width) * 100;
@@ -119,17 +120,17 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
           percentResult = 0;
         }
 
-        if (percentResult >= maxPositionProgressGrabButton.current) {
-          percentResult = maxPositionProgressGrabButton.current;
+        if (percentResult >= maxPositionProgressSliderButton.current) {
+          percentResult = maxPositionProgressSliderButton.current;
         }
-        // /add to lib
 
-        const fixedPosition = fixGapFromGrabButton({
-          gapGrabButton: gapGrabButton.current,
-          maxPositionProgressGrabButton: maxPositionProgressGrabButton.current,
+        const fixedPosition = fixGapFromSliderButton({
+          gapSliderButton: gapSliderButton.current,
+          maxPositionProgressSliderButton:
+            maxPositionProgressSliderButton.current,
           percentResult,
         });
-        setPositionProgressGrabButton(percentResult);
+        setPositionProgressSliderButton(percentResult);
 
         const videoNewPos =
           (videoDataRef.current.duration * fixedPosition) / 100;
@@ -152,11 +153,11 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
         percentResult = 100;
       }
 
-      const realPosition = fixGapToGrabButton({
-        gapGrabButton: gapGrabButton.current,
+      const realPosition = fixGapToSliderButton({
+        gapSliderButton: gapSliderButton.current,
         percentResult,
       });
-      setPositionProgressGrabButton(realPosition);
+      setPositionProgressSliderButton(realPosition);
     }
   }, [videoData, containerRef]);
 
@@ -180,7 +181,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
 
   const result: ProgressBarContextData = useMemo(
     () => ({
-      positionProgressGrabButton,
+      positionProgressSliderButton,
       positionProgressPlayed,
       handleGoToPositionInProgressBar,
       handleHoldSliderButton,
@@ -193,7 +194,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
       handleGoToPositionInProgressBar,
       handleHoldSliderButton,
       isHoldingSliderButton,
-      positionProgressGrabButton,
+      positionProgressSliderButton,
       positionProgressPlayed,
       videoData,
     ]

@@ -123,7 +123,9 @@ export const useVideo = ({
     (position: number) => {
       if (videoElement) {
         videoElement.currentTime =
-          position > videoElement.duration ? videoElement.duration : position;
+          position > videoElement.duration
+            ? videoElement.duration
+            : Number(position || 0);
       }
     },
     [videoElement]

@@ -26,6 +26,10 @@
       opacity: 1;
       transform: scale(1);
     }
+
+    .tooltip {
+      visibility: visible;
+    }
   }
 
   .progressBarDot.isMobile::after {
@@ -35,4 +39,5 @@
     height: 35px;
     transform: translate(-18%, -18%);
   }
+
 }
