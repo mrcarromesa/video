@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMouseEvent } from "src/events/Mouse/hooks/useMouseEvent";
 
-import * as VideoDataProps from "../../dtos/VideoDataPropsDTO";
+import * as MediaData from "../../dtos/MediaDataDTO";
 import { ContainerProgressBar } from "./components/ContainerProgressBar";
 import SliderButton from "./components/SliderButton";
 import TooltipProgressTime from "./components/TooltipProgressTime";
@@ -10,15 +10,15 @@ import styles from "./styles.module.scss";
 import { secondsFormatTime } from "./utils/secondsFormatTime";
 
 interface ProgressBarProps {
-  videoData: VideoDataProps.VideoDataProps;
-  bufferedChunks: VideoDataProps.BufferedChunk[];
+  mediaData: MediaData.MediaDataProps;
+  bufferedChunks: MediaData.BufferedChunk[];
   onSeek: (time: number) => void;
   onSeekStart: () => void;
   onSeekEnd: () => void;
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
-  videoData,
+  mediaData,
   bufferedChunks,
   onSeek,
   onSeekStart,
@@ -36,12 +36,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     }
   }, []);
 
-  const [hoverPlayerTime, setHoverPlayerTime] = useState({
+  const [hoverPlayerTimeTooltip, setHoverPlayerTimeTooltip] = useState({
     positionX: 0,
     time: "0",
   });
 
-  const onHoverProgressBarPreview = useCallback(() => {
+  const onHoverProgressBarTooltip = useCallback(() => {
     if (containerRef.current) {
       const { x, width } = containerRef.current.getBoundingClientRect();
       const positionXCalc = position.x - x;
@@ -55,16 +55,19 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         positionX = width;
       }
 
-      const videoTimePos = (videoData.duration * positionX) / width;
-      setHoverPlayerTime({ positionX, time: secondsFormatTime(videoTimePos) });
+      const mediaTimePos = (mediaData.duration * positionX) / width;
+      setHoverPlayerTimeTooltip({
+        positionX,
+        time: secondsFormatTime(mediaTimePos),
+      });
     }
-  }, [position, videoData]);
+  }, [position, mediaData]);
 
   return (
     <AppProgressBarProvider
       containerRef={containerRef}
       progressBarDotRef={progressBarDotRef}
-      videoData={videoData}
+      mediaData={mediaData}
       bufferedChunks={bufferedChunks}
       onSeek={onSeek}
       onSeekStart={onSeekStart}
@@ -76,11 +79,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         style={{
           visibility: isReady ? "visible" : "hidden",
         }}
-        onMouseMove={onHoverProgressBarPreview}
+        onMouseMove={onHoverProgressBarTooltip}
         onContextMenu={(e) => e.preventDefault()}
       >
         <TooltipProgressTime
-          data={hoverPlayerTime}
+          data={hoverPlayerTimeTooltip}
           className={styles.tooltip}
         />
         <ContainerProgressBar />

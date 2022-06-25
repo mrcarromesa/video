@@ -4,7 +4,7 @@ export interface BufferedChunk {
   range: number;
 }
 
-export interface VideoDataProps {
+export interface MediaDataProps {
   duration: number;
   currentTime: number;
 }

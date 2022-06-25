@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import * as VideoDataProps from "src/components/Video/dtos/VideoDataPropsDTO";
+import * as MediaData from "src/components/Media/dtos/MediaDataDTO";
 import { useMouseEvent } from "src/events/Mouse/hooks/useMouseEvent";
 import { useWindowResize } from "src/events/Window/hooks/useWindowResize";
 
@@ -22,8 +22,8 @@ import {
 
 export interface ProgressBarProviderProps {
   children: ReactNode;
-  videoData: VideoDataProps.VideoDataProps;
-  bufferedChunks: VideoDataProps.BufferedChunk[];
+  mediaData: MediaData.MediaDataProps;
+  bufferedChunks: MediaData.BufferedChunk[];
   containerRef: RefObject<HTMLDivElement>;
   progressBarDotRef: RefObject<HTMLDivElement>;
   onSeek: (time: number) => void;
@@ -35,8 +35,8 @@ interface ProgressBarContextData {
   isHoldingSliderButton: boolean;
   positionProgressPlayed: number;
   positionProgressSliderButton: number;
-  videoData: VideoDataProps.VideoDataProps;
-  bufferedChunks: VideoDataProps.BufferedChunk[];
+  mediaData: MediaData.MediaDataProps;
+  bufferedChunks: MediaData.BufferedChunk[];
   handleHoldSliderButton: () => void;
   handleGoToPositionInProgressBar: () => void;
 }
@@ -50,7 +50,7 @@ const WAIT_RELEASE_SLIDER_MILLISECONDS = 10;
 export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
   containerRef,
   progressBarDotRef,
-  videoData,
+  mediaData,
   bufferedChunks,
   children,
   onSeek,
@@ -63,7 +63,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
   const maxPositionProgressSliderButton = useRef(0);
   const gapSliderButton = useRef(0);
   const isSeeking = useRef(false);
-  const videoDataRef = useRef<VideoDataProps.VideoDataProps>(videoData);
+  const mediaDataRef = useRef<MediaData.MediaDataProps>(mediaData);
 
   const [positionProgressSliderButton, setPositionProgressSliderButton] =
     useState(0);
@@ -71,8 +71,8 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
   const [positionProgressPlayed, setPositionProgressPlayed] = useState(0);
 
   useEffect(() => {
-    videoDataRef.current = videoData;
-  }, [videoData]);
+    mediaDataRef.current = mediaData;
+  }, [mediaData]);
 
   useEffect(() => {
     const buttonPxWidth = progressBarDotRef.current?.clientWidth || 1;
@@ -109,7 +109,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
 
   const handleGoToPositionInProgressBar = useCallback(
     (elementWidth = 0) => {
-      if (containerRef.current && videoDataRef.current.duration > 0) {
+      if (containerRef.current && mediaDataRef.current.duration > 0) {
         const { x, width } = containerRef.current.getBoundingClientRect();
 
         const positionX = position.x - x - elementWidth;
@@ -132,10 +132,10 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
         });
         setPositionProgressSliderButton(percentResult);
 
-        const videoNewPos =
-          (videoDataRef.current.duration * fixedPosition) / 100;
+        const mediaNewPos =
+          (mediaDataRef.current.duration * fixedPosition) / 100;
 
-        onSeek(videoNewPos);
+        onSeek(mediaNewPos);
       }
     },
     [containerRef, position.x, onSeek]
@@ -143,7 +143,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
 
   useEffect(() => {
     if (!isSeeking.current && containerRef.current) {
-      let percentResult = (videoData.currentTime * 100) / videoData.duration;
+      let percentResult = (mediaData.currentTime * 100) / mediaData.duration;
 
       if (percentResult < 0) {
         percentResult = 0;
@@ -159,7 +159,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
       });
       setPositionProgressSliderButton(realPosition);
     }
-  }, [videoData, containerRef]);
+  }, [mediaData, containerRef]);
 
   useEffect(() => {
     if (isHoldingSliderButton && progressBarDotRef.current) {
@@ -186,7 +186,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
       handleGoToPositionInProgressBar,
       handleHoldSliderButton,
       isHoldingSliderButton,
-      videoData,
+      mediaData,
       bufferedChunks,
     }),
     [
@@ -196,7 +196,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
       isHoldingSliderButton,
       positionProgressSliderButton,
       positionProgressPlayed,
-      videoData,
+      mediaData,
     ]
   );
 

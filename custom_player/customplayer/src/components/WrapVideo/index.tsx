@@ -1,12 +1,15 @@
-import React from 'react';
-import Video from '../Video';
+import React from "react";
+
+import Media from "../Media";
 
 // import { Container } from './styles';
 
-const WrapVideo: React.FC = () => {
-  return <Video video={{
-    src: 'aaa',
-  }} />;
-}
+const WrapVideo: React.FC = () => (
+  <Media
+    media={{
+      src: "aaa",
+    }}
+  />
+);
 
 export default WrapVideo;

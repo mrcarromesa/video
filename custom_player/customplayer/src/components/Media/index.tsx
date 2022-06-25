@@ -1,26 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 // import Progress from 'src/components/Video/Controls/ProgressBar/_old1_index'
-import Progress from "src/components/Video/Controls/ProgressBar";
+import Progress from "src/components/Media/Controls/ProgressBar";
 
-import { useVideo } from "./hooks/useVideo";
+import { useMedia } from "./hooks/useMedia";
 
-interface VideoProps {
-  video: any;
+interface MediaProps {
+  media: any;
 }
 
-const Video: React.FC<VideoProps> = () => {
+const Media: React.FC<MediaProps> = () => {
   const [isReady, setIsReady] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRef = useRef<HTMLVideoElement>(null);
 
-  const { videoData, goToTime, bufferedChunks } = useVideo({
-    videoElement: videoRef.current,
+  const { mediaData, goToTime, bufferedChunks } = useMedia({
+    mediaElement: mediaRef.current,
     startIn: 5,
   });
 
   useEffect(() => {
-    if (videoRef.current) {
+    if (mediaRef.current) {
       setIsReady(true);
-      videoRef.current.duration;
+      mediaRef.current.duration;
     }
   }, []);
   return (
@@ -30,7 +30,7 @@ const Video: React.FC<VideoProps> = () => {
         style={{
           visibility: isReady ? "visible" : "hidden",
         }}
-        ref={videoRef}
+        ref={mediaRef}
         width="500"
         controls
         muted
@@ -41,7 +41,7 @@ const Video: React.FC<VideoProps> = () => {
         />
       </video>
       <Progress
-        videoData={videoData}
+        mediaData={mediaData}
         bufferedChunks={bufferedChunks}
         onSeek={(time) => {
           goToTime(time);
@@ -53,4 +53,4 @@ const Video: React.FC<VideoProps> = () => {
   );
 };
 
-export default Video;
+export default Media;

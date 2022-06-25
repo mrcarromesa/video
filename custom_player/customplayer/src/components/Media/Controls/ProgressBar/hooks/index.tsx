@@ -6,7 +6,7 @@ import {
 const AppProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
   containerRef,
   progressBarDotRef,
-  videoData,
+  mediaData,
   bufferedChunks,
   onSeek,
   onSeekEnd,
@@ -16,7 +16,7 @@ const AppProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
   <ProgressBarProvider
     containerRef={containerRef}
     progressBarDotRef={progressBarDotRef}
-    videoData={videoData}
+    mediaData={mediaData}
     bufferedChunks={bufferedChunks}
     onSeek={onSeek}
     onSeekEnd={onSeekEnd}
