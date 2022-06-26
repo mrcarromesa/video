@@ -31,8 +31,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <AppProgressBarProvider
-      containerProgressBarRef={containerProgressBarRef}
-      progressBarSliderButtonRef={progressBarSliderButtonRef}
+      containerProgressBar={containerProgressBarRef.current}
+      progressBarSliderButton={progressBarSliderButtonRef.current}
       mediaData={mediaData}
       bufferedChunks={bufferedChunks}
       onSeek={onSeek}

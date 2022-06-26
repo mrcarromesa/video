@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-import { useProgressBar } from "../../hooks/useProgressBar";
+import { useSliderButton } from "../../hooks/useSliderButton";
 import { LineHoverProgress } from "../LineHoverProgress";
 import { PlayedProgress } from "../PlayedProgress";
 import { ProgressBarLoaded } from "../ProgressBarLoaded";
@@ -11,9 +11,8 @@ export const ContentProgressBar: React.FC = () => {
   const {
     isHoldingSliderButton,
     handleHoldSliderButton,
-    positionProgressPlayed,
     handleGoToPositionInProgressBar,
-  } = useProgressBar();
+  } = useSliderButton();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const { hoverPlayerPreviewPositionX, onHoverProgressBarPreview } =
@@ -41,7 +40,6 @@ export const ContentProgressBar: React.FC = () => {
             ${styles.progressBarPlayed}
             ${!isHoldingSliderButton ? styles.isNotGrabbing : ""}
           `}
-        seekPositionX={positionProgressPlayed}
       />
     </div>
   );

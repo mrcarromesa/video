@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 import { useWindowResize } from "src/events/Window/hooks/useWindowResize";
 
-import { useProgressBar } from "../../hooks/useProgressBar";
+import { useSliderButton } from "../../hooks/useSliderButton";
 import styles from "./styles.module.scss";
 
 interface SliderButtonProps {
@@ -14,7 +14,7 @@ export const SliderButton = forwardRef<HTMLDivElement, SliderButtonProps>(
       isHoldingSliderButton,
       handleHoldSliderButton,
       positionProgressSliderButton,
-    } = useProgressBar();
+    } = useSliderButton();
     const { isMobile } = useWindowResize();
     return (
       <div

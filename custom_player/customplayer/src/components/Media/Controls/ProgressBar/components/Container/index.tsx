@@ -1,6 +1,6 @@
 import { forwardRef, RefObject, useRef } from "react";
 
-import { useProgressBar } from "../../hooks/useProgressBar";
+import { useSliderButton } from "../../hooks/useSliderButton";
 import { ContentProgressBar } from "../ContentProgressBar";
 import { SliderButton } from "../SliderButton";
 import { TooltipProgressTime } from "../TooltipProgressTime";
@@ -16,7 +16,7 @@ export const Container = forwardRef<HTMLDivElement, ContainerProps>(
   ({ isReady, progressBarSliderButtonRef }, ref) => {
     const tooltipProgressTimeRef = useRef<HTMLDivElement>(null);
 
-    const { isHoldingSliderButton } = useProgressBar();
+    const { isHoldingSliderButton } = useSliderButton();
     const { hoverPlayerTimeTooltip, onHoverProgressBarTooltip } =
       useHoverProgressBarTooltip({
         containerRef: ref as RefObject<HTMLDivElement>,

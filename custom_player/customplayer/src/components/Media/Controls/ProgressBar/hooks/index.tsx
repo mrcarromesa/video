@@ -1,11 +1,11 @@
 import {
-  ProgressBarProvider,
-  ProgressBarProviderProps,
-} from "./useProgressBar";
+  SliderButtonProvider,
+  SliderButtonProviderProps,
+} from "./useSliderButton";
 
-const AppProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
-  containerProgressBarRef,
-  progressBarSliderButtonRef,
+const AppProgressBarProvider: React.FC<SliderButtonProviderProps> = ({
+  containerProgressBar,
+  progressBarSliderButton,
   mediaData,
   bufferedChunks,
   onSeek,
@@ -13,9 +13,9 @@ const AppProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
   onSeekStart,
   children,
 }) => (
-  <ProgressBarProvider
-    containerProgressBarRef={containerProgressBarRef}
-    progressBarSliderButtonRef={progressBarSliderButtonRef}
+  <SliderButtonProvider
+    containerProgressBar={containerProgressBar}
+    progressBarSliderButton={progressBarSliderButton}
     mediaData={mediaData}
     bufferedChunks={bufferedChunks}
     onSeek={onSeek}
@@ -23,7 +23,7 @@ const AppProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
     onSeekStart={onSeekStart}
   >
     {children}
-  </ProgressBarProvider>
+  </SliderButtonProvider>
 );
 
 export default AppProgressBarProvider;

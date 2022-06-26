@@ -1,4 +1,4 @@
-import { useProgressBar } from "../../hooks/useProgressBar";
+import { useSliderButton } from "../../hooks/useSliderButton";
 
 interface ProgressBarLoadedProps {
   className: string;
@@ -7,7 +7,7 @@ interface ProgressBarLoadedProps {
 export const ProgressBarLoaded: React.FC<ProgressBarLoadedProps> = ({
   className,
 }) => {
-  const { bufferedChunks } = useProgressBar();
+  const { bufferedChunks } = useSliderButton();
 
   return (
     <>
