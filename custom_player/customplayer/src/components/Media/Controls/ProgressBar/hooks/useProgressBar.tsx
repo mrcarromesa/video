@@ -14,27 +14,28 @@ import * as MediaData from "src/components/Media/dtos/MediaDataDTO";
 import { useMouseEvent } from "src/events/Mouse/hooks/useMouseEvent";
 import { useWindowResize } from "src/events/Window/hooks/useWindowResize";
 
-import { calcMaxPercentPositionSliderButton } from "../utils/calcMaxPercentPositionSliderButton";
 import {
-  fixGapFromSliderButton,
-  fixGapToSliderButton,
-} from "../utils/fixSliderButtonPosition";
+  addGapToResult,
+  removeGapFromResult,
+} from "../utils/calcGapBetweenSliderButtonAndProgressBar";
+import { calcMaxPercentPositionSliderButton } from "../utils/calcMaxPercentPositionSliderButton";
 
 export interface ProgressBarProviderProps {
   children: ReactNode;
   mediaData: MediaData.MediaDataProps;
   bufferedChunks: MediaData.BufferedChunk[];
-  containerRef: RefObject<HTMLDivElement>;
-  progressBarDotRef: RefObject<HTMLDivElement>;
+  containerProgressBarRef: RefObject<HTMLDivElement>;
+  progressBarSliderButtonRef: RefObject<HTMLDivElement>;
   onSeek: (time: number) => void;
-  onSeekStart: () => void;
-  onSeekEnd: () => void;
+  onSeekStart: (time: number) => void;
+  onSeekEnd: (time: number) => void;
 }
 
 interface ProgressBarContextData {
   isHoldingSliderButton: boolean;
   positionProgressPlayed: number;
   positionProgressSliderButton: number;
+  progressBarSliderButton: HTMLDivElement | null;
   mediaData: MediaData.MediaDataProps;
   bufferedChunks: MediaData.BufferedChunk[];
   handleHoldSliderButton: () => void;
@@ -48,8 +49,8 @@ const ProgressBarContext = createContext<ProgressBarContextData>(
 const WAIT_RELEASE_SLIDER_MILLISECONDS = 10;
 
 export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
-  containerRef,
-  progressBarDotRef,
+  containerProgressBarRef,
+  progressBarSliderButtonRef,
   mediaData,
   bufferedChunks,
   children,
@@ -75,42 +76,55 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
   }, [mediaData]);
 
   useEffect(() => {
-    const buttonPxWidth = progressBarDotRef.current?.clientWidth || 1;
-    const containerWidth =
-      containerRef.current?.getBoundingClientRect().width || 1;
-    maxPositionProgressSliderButton.current =
-      calcMaxPercentPositionSliderButton({
-        buttonWidth: buttonPxWidth,
-        containerWidth,
-      });
+    const getMaxPositionToProgressSliderButton = () => {
+      const buttonPxWidth =
+        progressBarSliderButtonRef.current?.getBoundingClientRect().width || 1;
+      const containerWidth =
+        containerProgressBarRef.current?.getBoundingClientRect().width || 1;
+      maxPositionProgressSliderButton.current =
+        calcMaxPercentPositionSliderButton({
+          buttonWidth: buttonPxWidth,
+          containerWidth,
+        });
+    };
+    getMaxPositionToProgressSliderButton();
+
     gapSliderButton.current = 100 - maxPositionProgressSliderButton.current;
-  }, [containerRef, dimensions, progressBarDotRef]);
+  }, [containerProgressBarRef, dimensions, progressBarSliderButtonRef]);
 
   useEffect(() => {
-    if (!isMouseDown && isSeeking.current) {
-      setIsHoldingSliderButton(false);
-      onSeekEnd();
-      debounce(() => {
-        isSeeking.current = false;
-      }, WAIT_RELEASE_SLIDER_MILLISECONDS)();
-    }
+    const onReleaseMouseButtonFromSliderButton = () => {
+      if (!isMouseDown && isSeeking.current) {
+        setIsHoldingSliderButton(false);
+        onSeekEnd(mediaDataRef.current.currentTime);
+        debounce(() => {
+          isSeeking.current = false;
+        }, WAIT_RELEASE_SLIDER_MILLISECONDS)();
+      }
+    };
+
+    onReleaseMouseButtonFromSliderButton();
   }, [isMouseDown, onSeekEnd]);
 
   useEffect(() => {
     setPositionProgressPlayed(
-      fixGapFromSliderButton({
+      addGapToResult({
         gapSliderButton: gapSliderButton.current,
         maxPositionProgressSliderButton:
           maxPositionProgressSliderButton.current,
         percentResult: positionProgressSliderButton,
       }) || 0
     );
-  }, [positionProgressSliderButton, dimensions]);
+  }, [positionProgressSliderButton]);
 
   const handleGoToPositionInProgressBar = useCallback(
     (elementWidth = 0) => {
-      if (containerRef.current && mediaDataRef.current.duration > 0) {
-        const { x, width } = containerRef.current.getBoundingClientRect();
+      if (
+        containerProgressBarRef.current &&
+        mediaDataRef.current.duration > 0
+      ) {
+        const { x, width } =
+          containerProgressBarRef.current.getBoundingClientRect();
 
         const positionX = position.x - x - elementWidth;
 
@@ -124,7 +138,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
           percentResult = maxPositionProgressSliderButton.current;
         }
 
-        const fixedPosition = fixGapFromSliderButton({
+        const fixedPosition = addGapToResult({
           gapSliderButton: gapSliderButton.current,
           maxPositionProgressSliderButton:
             maxPositionProgressSliderButton.current,
@@ -138,42 +152,54 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
         onSeek(mediaNewPos);
       }
     },
-    [containerRef, position.x, onSeek]
+    [containerProgressBarRef, position.x, onSeek]
   );
 
   useEffect(() => {
-    if (!isSeeking.current && containerRef.current) {
-      let percentResult = (mediaData.currentTime * 100) / mediaData.duration;
+    const onWhileMediaIsRunning = () => {
+      if (!isSeeking.current && containerProgressBarRef.current) {
+        let percentResult = (mediaData.currentTime * 100) / mediaData.duration;
 
-      if (percentResult < 0) {
-        percentResult = 0;
+        if (percentResult < 0) {
+          percentResult = 0;
+        }
+
+        if (percentResult >= 100) {
+          percentResult = 100;
+        }
+
+        const realPosition = removeGapFromResult({
+          gapSliderButton: gapSliderButton.current,
+          percentResult,
+        });
+
+        setPositionProgressSliderButton(realPosition);
       }
-
-      if (percentResult >= 100) {
-        percentResult = 100;
-      }
-
-      const realPosition = fixGapToSliderButton({
-        gapSliderButton: gapSliderButton.current,
-        percentResult,
-      });
-      setPositionProgressSliderButton(realPosition);
-    }
-  }, [mediaData, containerRef]);
+    };
+    onWhileMediaIsRunning();
+  }, [mediaData, containerProgressBarRef, dimensions]);
 
   useEffect(() => {
-    if (isHoldingSliderButton && progressBarDotRef.current) {
-      onSeekStart();
-      isSeeking.current = true;
-      const { clientWidth: elementOffsetWidth } = progressBarDotRef.current;
-      handleGoToPositionInProgressBar(elementOffsetWidth / 2);
-    }
+    const onWhileBrowsingProgressBar = () => {
+      if (isHoldingSliderButton && progressBarSliderButtonRef.current) {
+        const { clientWidth: elementOffsetWidth } =
+          progressBarSliderButtonRef.current;
+        handleGoToPositionInProgressBar(elementOffsetWidth / 2);
+      }
+    };
+    onWhileBrowsingProgressBar();
   }, [
     isHoldingSliderButton,
     handleGoToPositionInProgressBar,
-    onSeekStart,
-    progressBarDotRef,
+    progressBarSliderButtonRef,
   ]);
+
+  useEffect(() => {
+    if (isHoldingSliderButton && !isSeeking.current) {
+      isSeeking.current = true;
+      onSeekStart(mediaDataRef.current.currentTime);
+    }
+  }, [isHoldingSliderButton, onSeekStart]);
 
   const handleHoldSliderButton = useCallback(() => {
     setIsHoldingSliderButton(true);
@@ -182,6 +208,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
   const result: ProgressBarContextData = useMemo(
     () => ({
       positionProgressSliderButton,
+      progressBarSliderButton: progressBarSliderButtonRef.current,
       positionProgressPlayed,
       handleGoToPositionInProgressBar,
       handleHoldSliderButton,
@@ -192,6 +219,7 @@ export const ProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
     [
       bufferedChunks,
       handleGoToPositionInProgressBar,
+      progressBarSliderButtonRef,
       handleHoldSliderButton,
       isHoldingSliderButton,
       positionProgressSliderButton,

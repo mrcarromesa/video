@@ -36,18 +36,27 @@ const Media: React.FC<MediaProps> = () => {
         muted
       >
         <source
-          src="http://www.w3schools.com/html/mov_bbb.mp4"
+          src="https://iandevlin.github.io/mdn/video-player-with-captions/video/sintel-short.mp4"
           type="video/mp4"
         />
       </video>
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
       <Progress
         mediaData={mediaData}
         bufferedChunks={bufferedChunks}
         onSeek={(time) => {
           goToTime(time);
         }}
-        onSeekEnd={() => {}}
-        onSeekStart={() => {}}
+        onSeekEnd={(time) => {
+          console.log("end", time);
+        }}
+        onSeekStart={(time) => {
+          console.log("start", time);
+        }}
       />
     </>
   );

@@ -4,8 +4,8 @@ import {
 } from "./useProgressBar";
 
 const AppProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
-  containerRef,
-  progressBarDotRef,
+  containerProgressBarRef,
+  progressBarSliderButtonRef,
   mediaData,
   bufferedChunks,
   onSeek,
@@ -14,8 +14,8 @@ const AppProgressBarProvider: React.FC<ProgressBarProviderProps> = ({
   children,
 }) => (
   <ProgressBarProvider
-    containerRef={containerRef}
-    progressBarDotRef={progressBarDotRef}
+    containerProgressBarRef={containerProgressBarRef}
+    progressBarSliderButtonRef={progressBarSliderButtonRef}
     mediaData={mediaData}
     bufferedChunks={bufferedChunks}
     onSeek={onSeek}

@@ -8,7 +8,7 @@ interface SliderButtonProps {
   className: string;
 }
 
-const SliderButton = forwardRef<HTMLDivElement, SliderButtonProps>(
+export const SliderButton = forwardRef<HTMLDivElement, SliderButtonProps>(
   ({ className }, ref) => {
     const {
       isHoldingSliderButton,
@@ -34,5 +34,3 @@ const SliderButton = forwardRef<HTMLDivElement, SliderButtonProps>(
 );
 
 SliderButton.displayName = "SliderButton";
-
-export default SliderButton;

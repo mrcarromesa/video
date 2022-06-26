@@ -1,28 +1,28 @@
-interface FixGapFromSliderButtonProps {
+interface GapToAddToResultProps {
   percentResult: number;
   gapSliderButton: number;
   maxPositionProgressSliderButton: number;
 }
 
-interface FixGapToSliderButtonProps {
+interface GapToRemoveFromResultProps {
   percentResult: number;
   gapSliderButton: number;
 }
 
-export const fixGapFromSliderButton = ({
+export const addGapToResult = ({
   percentResult,
   gapSliderButton,
   maxPositionProgressSliderButton,
-}: FixGapFromSliderButtonProps): number => {
+}: GapToAddToResultProps): number => {
   const fixGap =
     (percentResult * gapSliderButton) / maxPositionProgressSliderButton;
   return percentResult + fixGap;
 };
 
-export const fixGapToSliderButton = ({
+export const removeGapFromResult = ({
   percentResult,
   gapSliderButton,
-}: FixGapToSliderButtonProps): number => {
+}: GapToRemoveFromResultProps): number => {
   const fixGap = (percentResult * gapSliderButton) / 100;
   return percentResult - fixGap;
 };

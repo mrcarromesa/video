@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   
-  .progressBarDot {
+  .sliderButton {
     background: var(--progress-bar-dot-background);
     width: 15px;
     min-width: 15px;
@@ -21,8 +21,8 @@
     transition: opacity .2s ease-in-out, transform .2s ease-in-out;
   }
 
-  &:hover {
-    .progressBarDot {
+  &:hover, &.isHoldingSliderButton {
+    .sliderButton {
       opacity: 1;
       transform: scale(1);
     }
@@ -32,7 +32,7 @@
     }
   }
 
-  .progressBarDot.isMobile::after {
+  .sliderButton.isMobile::after {
     content: ' ';
     position: absolute;
     width: 35px;

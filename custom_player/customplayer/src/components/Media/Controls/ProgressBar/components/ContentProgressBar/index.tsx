@@ -1,13 +1,13 @@
-import { useCallback, useRef, useState } from "react";
-import { useMouseEvent } from "src/events/Mouse/hooks/useMouseEvent";
+import { useRef } from "react";
 
 import { useProgressBar } from "../../hooks/useProgressBar";
 import { LineHoverProgress } from "../LineHoverProgress";
 import { PlayedProgress } from "../PlayedProgress";
 import { ProgressBarLoaded } from "../ProgressBarLoaded";
+import { useHoverProgressBarPreview } from "./hooks/useHoverProgressBarPreview";
 import styles from "./styles.module.scss";
 
-export const ContainerProgressBar: React.FC = () => {
+export const ContentProgressBar: React.FC = () => {
   const {
     isHoldingSliderButton,
     handleHoldSliderButton,
@@ -15,20 +15,11 @@ export const ContainerProgressBar: React.FC = () => {
     handleGoToPositionInProgressBar,
   } = useProgressBar();
 
-  const { position } = useMouseEvent();
-
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const [hoverPlayerPreview, setHoverPlayerPreview] = useState(0);
-
-  const onHoverProgressBarPreview = useCallback(() => {
-    if (containerRef.current) {
-      const { x, width } = containerRef.current.getBoundingClientRect();
-      const positionX = position.x - x;
-      const percentResult = positionX / width;
-      setHoverPlayerPreview(percentResult);
-    }
-  }, [position]);
+  const { hoverPlayerPreviewPositionX, onHoverProgressBarPreview } =
+    useHoverProgressBarPreview({
+      containerRef,
+    });
 
   return (
     <div
@@ -43,7 +34,7 @@ export const ContainerProgressBar: React.FC = () => {
       <ProgressBarLoaded className={styles.progressBarLoaded} />
       <LineHoverProgress
         className={styles.progressBarPreview}
-        positionX={hoverPlayerPreview}
+        positionX={hoverPlayerPreviewPositionX}
       />
       <PlayedProgress
         className={`
