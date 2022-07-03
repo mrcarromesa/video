@@ -88,7 +88,7 @@ describe("Testing useHoverProgressBarTooltip", () => {
       onHoverProgressBarTooltip();
     });
 
-    expect(result.current.hoverPlayerTimeTooltip.time).toEqual("00:11");
+    expect(result.current.hoverPlayerTimeTooltip.time).toEqual("00:10");
   });
 
   it("should be return position and time equal zero when position x container is more than position x from mouse to set in tooltip when elements found", () => {
