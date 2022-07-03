@@ -46,14 +46,17 @@ export const useMouseEvent = (): MouseEventResult => {
       touch.target.dispatchEvent(simulatedEvent);
     };
 
-    const init = () => {
-      document.addEventListener("touchstart", touchHandler, true);
-      document.addEventListener("touchmove", touchHandler, true);
-      document.addEventListener("touchend", touchHandler, true);
-      document.addEventListener("touchcancel", touchHandler, true);
-    };
+    document.addEventListener("touchstart", touchHandler, true);
+    document.addEventListener("touchmove", touchHandler, true);
+    document.addEventListener("touchend", touchHandler, true);
+    document.addEventListener("touchcancel", touchHandler, true);
 
-    init();
+    return () => {
+      document.removeEventListener("touchstart", touchHandler, true);
+      document.removeEventListener("touchmove", touchHandler, true);
+      document.removeEventListener("touchend", touchHandler, true);
+      document.removeEventListener("touchcancel", touchHandler, true);
+    };
   }, []);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import WrapVideo from "src/components/WrapVideo";
+import { Media } from "src/components/Media";
 
 const Home: NextPage = () => (
   <>
@@ -15,7 +15,10 @@ const Home: NextPage = () => (
         minWidth: "200px",
       }}
     >
-      <WrapVideo />
+      <Media
+        src="https://iandevlin.github.io/mdn/video-player-with-captions/video/sintel-short.mp4"
+        type="video/mp4"
+      />
     </div>
     <br />
     <br />

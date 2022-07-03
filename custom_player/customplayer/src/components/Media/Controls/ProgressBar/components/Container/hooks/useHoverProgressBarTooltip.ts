@@ -1,8 +1,7 @@
 import { RefObject, useCallback, useEffect, useMemo, useState } from "react";
+import { useSliderButton } from "src/components/Media/Controls/ProgressBar/hooks/useSliderButton";
+import { formatSeconds } from "src/components/Media/Controls/ProgressBar/utils/formatSeconds";
 import { useMouseEvent } from "src/events/Mouse/hooks/useMouseEvent";
-
-import { useSliderButton } from "../../../hooks/useSliderButton";
-import { formatSeconds } from "../../../utils/formatSeconds";
 
 interface UseHoverProgressBarTooltipProps {
   containerRef: RefObject<HTMLDivElement>;
@@ -21,14 +20,14 @@ export const useHoverProgressBarTooltip = ({
   containerRef,
   tooltipProgressTimeRef,
 }: UseHoverProgressBarTooltipProps): UseHoverProgressBarTooltipResult => {
-  const { position } = useMouseEvent();
-  const { mediaData, progressBarSliderButton, isHoldingSliderButton } =
-    useSliderButton();
-
   const [hoverPlayerTimeTooltip, setHoverPlayerTimeTooltip] = useState({
     positionX: 0,
     time: "0",
   });
+
+  const { position } = useMouseEvent();
+  const { mediaData, progressBarSliderButton, isHoldingSliderButton } =
+    useSliderButton();
 
   const onHoverProgressBarTooltip = useCallback(() => {
     if (

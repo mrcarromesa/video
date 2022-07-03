@@ -5,16 +5,18 @@ import Progress from "src/components/Media/Controls/ProgressBar";
 import { useMedia } from "./hooks/useMedia";
 
 interface MediaProps {
-  media: any;
+  src: string;
+  type: string;
+  startIn?: number;
 }
 
-const Media: React.FC<MediaProps> = () => {
+export const Media: React.FC<MediaProps> = ({ src, type, startIn }) => {
   const [isReady, setIsReady] = useState(false);
   const mediaRef = useRef<HTMLVideoElement>(null);
 
   const { mediaData, goToTime, bufferedChunks } = useMedia({
     mediaElement: mediaRef.current,
-    startIn: 5,
+    startIn: startIn || 0,
   });
 
   useEffect(() => {
@@ -35,10 +37,7 @@ const Media: React.FC<MediaProps> = () => {
         controls
         muted
       >
-        <source
-          src="https://iandevlin.github.io/mdn/video-player-with-captions/video/sintel-short.mp4"
-          type="video/mp4"
-        />
+        <source src={src} type={type} />
       </video>
       <br />
       <br />
@@ -61,5 +60,3 @@ const Media: React.FC<MediaProps> = () => {
     </>
   );
 };
-
-export default Media;

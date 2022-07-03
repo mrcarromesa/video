@@ -10,6 +10,7 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "prettier",
     "next/core-web-vitals",
+    "plugin:storybook/recommended",
   ],
   globals: {
     Atomics: "readonly",
@@ -39,9 +40,16 @@ module.exports = {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/explicit-function-return-type": [
       "off",
-      { allowExpressions: true },
+      {
+        allowExpressions: true,
+      },
     ],
-    "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        argsIgnorePattern: "_",
+      },
+    ],
     "arrow-parens": "off",
     camelcase: "off",
     "class-methods-use-this": "off",
@@ -75,7 +83,12 @@ module.exports = {
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     "react/prop-types": "off",
-    "react/jsx-filename-extension": [1, { extensions: [".tsx", ".ts"] }],
+    "react/jsx-filename-extension": [
+      1,
+      {
+        extensions: [".tsx", ".ts"],
+      },
+    ],
     "react/destructuring-assignment": "off",
     "react/no-array-index-key": "off",
     "react/function-component-definition": "off",
