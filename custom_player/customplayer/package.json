@@ -10,7 +10,7 @@
     "lint": "next lint",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "test": "jest --config ./__tests__/conf/jest.config.js --watch",
+    "test": "jest --config ./__tests__/conf/jest.config.js --watchAll",
     "test:coverage": "jest --config ./__tests__/conf/jest.config.js --coverage"
   },
   "dependencies": {

@@ -21,7 +21,7 @@ jobs:
     - name: Install Packages
       run: cd custom_player/customplayer && npm install
     - name: Run Tests
-      run: cd custom_player/customplayer && npm run test
+      run: cd custom_player/customplayer && npm run test:coverage
     - name: Deploy to GH Packages
       if: success()
       run: cd custom_player/customplayer && npm run build-storybook
