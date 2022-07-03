@@ -2,6 +2,7 @@
   "name": "customplayer",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://mrcarromesa.github.io/video",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
