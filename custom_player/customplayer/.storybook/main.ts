@@ -2,6 +2,7 @@ const path = require('path');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
+  "typescript": { "reactDocgen": false },
   "stories": [
     "../src/**/*.stories.mdx",
     "../src/**/__stories__/*.stories.@(mdx|js|jsx|ts|tsx)",
