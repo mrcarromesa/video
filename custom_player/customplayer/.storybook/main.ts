@@ -12,7 +12,7 @@ module.exports = {
     "@storybook/addon-links",
     "@storybook/addon-essentials",
     "@storybook/addon-docs",
-    // "storybook-addon-react-docgen",
+    "storybook-addon-react-docgen",
     "@storybook/addon-interactions",
     {
       name: '@storybook/preset-scss',
