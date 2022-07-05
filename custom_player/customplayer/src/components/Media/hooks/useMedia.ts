@@ -29,41 +29,6 @@ export const useMedia = ({
 
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const getBufferedMedia = useCallback(
-    (media: HTMLVideoElement | HTMLAudioElement) => {
-      const buffers = media.buffered;
-      // let buffered = 0;
-      // for (let i = 0; i < buffers.length; i += 1) {
-      //   buffered += buffers.end(i) - buffers.start(i);
-      // }
-      const buffered = {
-        start: 0,
-        end: 0,
-        range: 0,
-      };
-
-      console.log("buffers.length", buffers.length);
-      if (buffers.length > 0) {
-        const lastBuffers = buffers.length - 1;
-        buffered.start = (buffers.start(lastBuffers) / media.duration) * 100;
-        buffered.end = (buffers.end(lastBuffers) / media.duration) * 100;
-        buffered.range =
-          ((buffers.end(lastBuffers) - buffers.start(lastBuffers)) /
-            media.duration) *
-          100;
-        // console.log(
-        //   buffers.end(lastBuffers),
-        //   " - ",
-        //   buffers.start(lastBuffers),
-        //   " / ",
-        //   media.duration
-        // );
-      }
-      return buffered;
-    },
-    []
-  );
-
   useEffect(() => {
     if (mediaElement) {
       mediaElement.currentTime = startIn || 0;
@@ -72,7 +37,7 @@ export const useMedia = ({
       currentTime: startIn ?? 0,
       duration: mediaElement?.duration ?? 0,
     });
-  }, [startIn, mediaElement, getBufferedMedia]);
+  }, [startIn, mediaElement]);
 
   const handleOnTimeUpdate = useCallback(() => {
     if (mediaElement) {
@@ -98,18 +63,19 @@ export const useMedia = ({
       mediaElement.onprogress = () => {
         const buffers = mediaElement.buffered;
         const bufferedChunks = [];
-        for (let i = 0; i < buffers.length; i += 1) {
-          const buffered = {
-            start: 0,
-            end: 0,
-            range: 0,
-          };
-          buffered.start = (buffers.start(i) / mediaElement.duration) * 100;
-          buffered.end = (buffers.end(i) / mediaElement.duration) * 100;
-          buffered.range =
-            ((buffers.end(i) - buffers.start(i)) / mediaElement.duration) * 100;
-          bufferedChunks.push(buffered);
-        }
+        const buffered = {
+          start: 0,
+          end: 0,
+          range: 0,
+        };
+        const lastBuffer = buffers.length - 1;
+        buffered.start = (buffers.start(0) / mediaElement.duration) * 100;
+        buffered.end = (buffers.end(lastBuffer) / mediaElement.duration) * 100;
+        buffered.range =
+          ((buffers.end(lastBuffer) - buffers.start(0)) /
+            mediaElement.duration) *
+          100;
+        bufferedChunks.push(buffered);
         setBufferedChunks(bufferedChunks);
       };
 
@@ -120,7 +86,7 @@ export const useMedia = ({
         });
       };
     }
-  }, [mediaElement, handleOnTimeUpdate, getBufferedMedia]);
+  }, [mediaElement, handleOnTimeUpdate]);
 
   const goToTime = useCallback(
     (position: number) => {
