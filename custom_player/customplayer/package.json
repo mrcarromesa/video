@@ -8,10 +8,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "storybook": "start-storybook -p 6006",
+    "storybook": "(start-storybook -p 6006) && echo 'OI'",
     "build-storybook": "build-storybook",
     "test": "jest --config ./__tests__/conf/jest.config.js --watchAll",
-    "test:coverage": "jest --config ./__tests__/conf/jest.config.js --coverage"
+    "test:coverage": "jest --config ./__tests__/conf/jest.config.js --coverage",
+    "e2e:browsers": "testcafe -b browserstack > browser.txt",
+    "e2e": "testcafe all ./e2e/",
+    "e2e:conf": "node ./e2e/testcafe.config.js"
   },
   "dependencies": {
     "lodash": "^4.17.21",
@@ -38,6 +41,7 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/react-hooks": "^8.0.1",
+    "@types/jest": "28.1.2",
     "@types/lodash": "^4.14.182",
     "@types/node": "18.0.0",
     "@types/react": "18.0.13",
@@ -46,6 +50,8 @@
     "@typescript-eslint/parser": "^5.11.0",
     "babel-jest": "^28.1.2",
     "babel-loader": "^8.2.5",
+    "browserstack": "^1.6.1",
+    "cypress": "^10.6.0",
     "eslint": "8.17.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-next": "12.1.6",
@@ -67,6 +73,8 @@
     "react-test-renderer": "^18.2.0",
     "sass-loader": "^13.0.2",
     "storybook-addon-react-docgen": "^1.2.42",
+    "testcafe": "^1.20.1",
+    "testcafe-browser-provider-browserstack": "^1.14.0",
     "ts-jest": "^28.0.5",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "4.7.3"

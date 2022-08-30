@@ -28,7 +28,24 @@ export default {
   },
 } as Meta;
 
-const Template: ComponentStory<typeof Media> = (args) => <Media {...args} />;
+const Template: ComponentStory<typeof Media> = (args) => (
+  <>
+    <Media {...args} />
+    <button
+      type="button"
+      id="playVideo"
+      onClick={async () => {
+        const video = document.getElementById("va") as HTMLVideoElement;
+        if (video && video.play) {
+          // eslint-disable-next-line storybook/context-in-play-function
+          await video.play();
+        }
+      }}
+    >
+      Play
+    </button>
+  </>
+);
 
 export const MediaElement = Template.bind({});
 

@@ -69,14 +69,19 @@ export const useMedia = ({
           range: 0,
         };
         const lastBuffer = buffers.length - 1;
-        buffered.start = (buffers.start(0) / mediaElement.duration) * 100;
-        buffered.end = (buffers.end(lastBuffer) / mediaElement.duration) * 100;
-        buffered.range =
-          ((buffers.end(lastBuffer) - buffers.start(0)) /
-            mediaElement.duration) *
-          100;
-        bufferedChunks.push(buffered);
-        setBufferedChunks(bufferedChunks);
+        try {
+          buffered.start = (buffers.start(0) / mediaElement.duration) * 100;
+          buffered.end =
+            (buffers.end(lastBuffer) / mediaElement.duration) * 100;
+          buffered.range =
+            ((buffers.end(lastBuffer) - buffers.start(0)) /
+              mediaElement.duration) *
+            100;
+          bufferedChunks.push(buffered);
+          setBufferedChunks(bufferedChunks);
+        } catch (err) {
+          //
+        }
       };
 
       mediaElement.oncanplay = () => {

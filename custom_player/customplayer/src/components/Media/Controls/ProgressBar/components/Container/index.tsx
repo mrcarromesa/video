@@ -25,6 +25,7 @@ export const Container = forwardRef<HTMLDivElement, ContainerProps>(
 
     return (
       <div
+        data-cy="playProgress"
         ref={ref}
         className={`${styles.container} ${
           isHoldingSliderButton ? styles.isHoldingSliderButton : ""

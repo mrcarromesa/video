@@ -1,0 +1,10 @@
+{
+  "build": "Test",
+  "project": "customplayer",
+  "name": "customplayer",
+  "browserstack.debug": true,
+  "browserstack.console": "verbose",
+  "browserstack.networkLogs": true,
+  
+  "browserstack.idleTimeout": "120"
+}
