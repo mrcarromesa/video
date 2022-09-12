@@ -2,6 +2,7 @@ import "../styles/globals.scss";
 
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import { withUnleashProvider } from "next-unleash";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -17,4 +18,4 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default MyApp;
+export default withUnleashProvider(MyApp);
