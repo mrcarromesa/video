@@ -378,3 +378,171 @@ module.exports = {
   },
 }
 ```
+
+---
+
+## Casos especiais
+
+### Redux
+
+- O arquivo `.storybook/preview.tsx` deve está configurado certinho:
+
+```tsx
+import { Provider } from 'react-redux';
+import configureStore from '../src/store/config';
+
+
+const store = configureStore();
+
+export const decorators = [
+  (Story: React.FC, context) => {
+    return (
+      <Provider store={store}>
+        <Story />
+      </Provider>
+    );
+  },
+  withNextRouter,
+];
+```
+
+- O story que irá utilizar o redux pode fazer da seguinte forma:
+
+```tsx
+import { Story } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import MyComponent, { IMyComponentProps } from '..';
+
+const MyTemplate: Story<IMyComponentProps> = ({ ...props }) => {
+  return <MyComponent {...props} />;
+};
+
+export const ComponentStory = MyTemplate.bind({});
+ComponentStory.args = {
+  visible: true,
+};
+
+const decorators = [
+  (Story: Story) => {
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+      
+      dispatch({ type: 'action.create', payload: {
+        // payload
+      }});
+
+      return () => {
+        // importante retornar ao estado anterior para não afetar outros stories
+        dispatch({ type: 'action.delete', payload: {
+          // payload
+        }});
+      };
+    }, [dispatch]);
+
+    return (
+      <div style={{ width: '100%' height: '100vh' }}>
+        <Story />
+      </div>
+    );
+  },
+];
+
+export default {
+  component: MyComponent,
+  title: 'Components/MyComponent',
+  decorators,
+  parameters: {
+    layout: 'centered',
+  },
+};
+```
+
+---
+
+### Utilizando Class
+
+- Se estiver utiliizando class em algum lugar e precisa fazer um mock dela no storybook existe uma forma!
+
+- Class:
+
+```ts
+class AnotherClass {
+  getAnother() {
+    return [1,2,3];
+  }
+}
+
+class MyClass {
+  public users: string[];
+  public another: AnotherClass;
+
+  setUser(user = '') {
+    this.users.push(user);
+  }
+
+  getUsers() {
+    return this.users;
+  }
+}
+```
+
+- Story:
+
+```tsx
+import { Story } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import MyClass from 'src/services/MyClass';
+import { useEffect } from 'react';
+
+import MyComponent, { IMyComponentProps } from '..';
+const MyTemplate: Story<IMyComponentProps> = ({ ...props }) => {
+  return <MyComponent {...props} />;
+};
+
+export const ComponentStory = MyTemplate.bind({});
+ComponentStory.args = {
+  visible: true,
+};
+
+const decorators = [
+  (Story: Story) => {
+
+    useEffect(() => {
+      const CopyMyClass = { ...MyClass };
+      Object.defineProperty(MyClass, 'setUser', {
+        value: '',
+      });
+
+      Object.defineProperty(ApplicationService, 'another', {
+        value: {
+          getAnother: () => [5,6],
+        },
+      });
+
+      return () => {
+        // voltar ao estado original para não afetar outros stories
+        Object.assign(MyClass, { ...CopyMyClass });
+      };
+    }, [dispatch]);
+
+    return (
+      <div style={{ width: '100%', height: '100vh' }}>
+        <Story />
+      </div>
+    );
+  },
+];
+
+export default {
+  component: MyComponent,
+  title: 'Components/MyComponent',
+  decorators,
+  parameters: {
+    layout: 'centered',
+  },
+};
+
+```
